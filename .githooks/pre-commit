@@ -1,0 +1,17 @@
+#!/bin/sh
+# Pantry is a public repo: refuse personal data, site details and binaries.
+# Enable with: git config core.hooksPath .githooks
+fail=0
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$files" ] && exit 0
+for f in $files; do
+  if git diff --cached --numstat -- "$f" | grep -q '^-'; then
+    echo "pre-commit: binary file refused: $f"; fail=1
+  fi
+done
+pat='[A-Za-z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|icloud)\.com|192\.168\.0\.(1|231)\b|pelorus|mrgibbage|morrow|suzanne|/home/[a-z]|/etc/homelab|c2411c7c|\b[3-6][0-9]{3}[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{4}\b'
+hits=$(git diff --cached -U0 -- $files ':!.githooks/pre-commit' | grep '^+' | grep -inE "$pat")
+if [ -n "$hits" ]; then
+  echo "pre-commit: personal or site-specific data in staged changes:"; echo "$hits"; fail=1
+fi
+exit $fail

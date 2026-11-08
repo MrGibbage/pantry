@@ -1,0 +1,18 @@
+# Live data and site config: never in the repo
+data/
+compose.override.yml
+*.db
+*.sqlite*
+inbox/
+# No binaries (icons are generated at build time by app/make_icons.py)
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.heic
+*.gif
+*.ico
+*.pdf
+*.zip
+__pycache__/
+*.pyc

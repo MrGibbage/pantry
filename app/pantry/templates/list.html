@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}List · Pantry{% endblock %}
+{% block body %}
+{% if not week %}
+<section class="card center"><p class="muted">No list yet.</p></section>
+{% elif not groups or (groups|length == 1 and not groups[0]["items"]) %}
+<section class="card center">
+  <h2>No list yet</h2>
+  <p class="muted">Claude drafts the list once dinners are picked.</p>
+</section>
+{% else %}
+<p class="hint">Tap <b>Need</b> or <b>Have</b>. Faded buttons are Claude's guess; tap to confirm or change.</p>
+
+{% if voice %}
+<section class="group">
+  <h3>🎙️ Already on the Grocery list</h3>
+  <ul class="items">
+    {% for v in voice %}
+    <li class="item" data-voice="{{ v.id }}">
+      <div class="what"><span class="nm">{{ v.text }}</span><span class="muted small">voice or Mealie</span></div>
+      <button class="btn small" data-voice-have="{{ v.id }}">Have it</button>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% elif voice_err %}<p class="muted small">Couldn't load the Mealie list: {{ voice_err }}</p>
+{% endif %}
+
+{% for g in groups %}
+<section class="group" data-section="{{ g.key }}">
+  <h3>{{ g.title }}</h3>
+  <ul class="items">
+  {% for it in g["items"] %}
+    {% set eff = it.decision or it.default_decision %}
+    <li class="item {{ 'is-'+eff if eff }} {{ 'guess' if not it.decision and it.default_decision }} {{ 'sent' if it.mealie_item_id }}" data-item="{{ it.id }}">
+      <div class="what">
+        <span class="nm">{{ it.name }}{% if it.qty %} <span class="qty">{{ it.qty }}</span>{% endif %}</span>
+        {% if it.detail or it.recipes %}<span class="muted small">{{ it.detail }}{% if it.detail and it.recipes %} · {% endif %}{{ it.recipes|join(", ") }}</span>{% endif %}
+      </div>
+      <div class="seg" role="group" aria-label="Need or have">
+        <button data-decide="need" aria-pressed="{{ 'true' if eff == 'need' else 'false' }}">Need</button>
+        <button data-decide="have" aria-pressed="{{ 'true' if eff == 'have' else 'false' }}">Have</button>
+      </div>
+      {% if g.key == "extra" %}<button class="x" data-del-item="{{ it.id }}" aria-label="Remove">×</button>{% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+  {% if g.key == "extra" %}
+  <form class="add" data-add-item>
+    <input name="name" placeholder="Add something…" autocomplete="off">
+    <button class="btn">Add</button>
+  </form>
+  {% endif %}
+</section>
+{% endfor %}
+
+<div class="sendbar">
+  <span><b>{{ need_count }}</b> to buy{% if unsent != need_count %} · {{ unsent }} not in Mealie yet{% endif %}</span>
+  {% if mealie_on %}
+  <button class="btn primary" data-send>Send to Mealie</button>
+  {% else %}
+  <span class="muted small">Claude sends it to Mealie</span>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

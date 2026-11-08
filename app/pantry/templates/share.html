@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Share · Pantry{% endblock %}
+{% block body %}
+<section class="card">
+  <h2>Suggest for this week</h2>
+  {% if not week %}
+    <p class="muted">There's no week started yet, so there's nowhere to put this.</p>
+  {% else %}
+  <form class="req" data-request data-after="/dinners">
+    {% if share_slug %}<p>Mealie recipe: <b>{{ share_slug.replace('-', ' ') }}</b></p>{% endif %}
+    <input name="url" type="url" value="{{ share_url }}" placeholder="Link">
+    <textarea name="text" rows="3" placeholder="Anything to add?">{{ share_text if not share_url or share_text != share_url }}</textarea>
+    <button class="btn primary">Send to Claude</button>
+  </form>
+  <p class="muted small">Tip: a link from Facebook is best imported into Mealie first (share it to Mealie),
+    then shared here from Mealie, so Claude can read the recipe.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Rate · Pantry{% endblock %}
+{% block body %}
+{% if not blocks %}
+<section class="card center"><p class="muted">Dinners you pick show up here to rate.</p></section>
+{% endif %}
+{% for b in blocks %}
+<section class="card">
+  <h3>Week of {{ b.week.id[5:7]|int }}/{{ b.week.id[8:10]|int }}</h3>
+  <ul class="rates">
+  {% for d in b.dishes %}
+    <li data-rate data-week="{{ b.week.id }}" data-slug="{{ d.slug }}">
+      <div class="top">
+        <a href="{{ recipe_url(d.slug) }}">{{ d.name }}</a>
+        <span class="seg">
+          <button data-r="1" aria-pressed="{{ 'true' if d.rating == 1 else 'false' }}" aria-label="Liked it">👍</button>
+          <button data-r="-1" aria-pressed="{{ 'true' if d.rating == -1 else 'false' }}" aria-label="Didn't like it">👎</button>
+        </span>
+      </div>
+      <input class="rnote" placeholder="Note (too spicy, make again, skip the rice…)" value="{{ d.note or '' }}">
+    </li>
+  {% endfor %}
+  </ul>
+</section>
+{% endfor %}
+{% endblock %}

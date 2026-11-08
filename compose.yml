@@ -1,0 +1,29 @@
+# Pantry: weekly dinner picks + grocery-list review, next to a Mealie instance.
+# Site-specific settings (people, network, Mealie ids, the receipt inbox mount and the secrets
+# file) go in compose.override.yml, which Docker Compose merges automatically and which is
+# gitignored. Start from compose.override.example.yml.
+services:
+  pantry:
+    build: .
+    image: pantry:local
+    container_name: pantry
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=96m        # multipart uploads spool here (kept in RAM)
+    mem_limit: 384m
+    memswap_limit: 384m
+    pids_limit: 64
+    ports:
+      - "8860:8000"
+    volumes:
+      - ./data:/data
+    environment:
+      - PANTRY_DB=/data/pantry.db
+      - PANTRY_VERSION=2
+      - PANTRY_ALLOW_LAN=1
+      - MEALIE_IDEA_TAG=pantry

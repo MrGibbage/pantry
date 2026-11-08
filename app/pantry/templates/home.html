@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block body %}
+{% if not week %}
+<section class="card center">
+  <h1>Nothing planned yet</h1>
+  <p class="muted">Claude posts this week's dinner ideas here. Ask Claude to start the week.</p>
+</section>
+{% else %}
+{% set steps = [("picking","Pick dinners"),("review","Review list"),("shopping","Shop"),("done","Done")] %}
+{% set order = {"picking":0,"listing":0,"review":1,"shopping":2,"done":3} %}
+<ol class="steps">
+  {% for key, label in steps %}
+  <li class="{{ 'done' if order[week.status] > loop.index0 }} {{ 'now' if order[week.status] == loop.index0 }}">{{ label }}</li>
+  {% endfor %}
+</ol>
+
+<section class="card next">
+  {% if week.status == "picking" %}
+    <h2>Pick 5 dinners</h2>
+    <p>{{ counts.picked }} of 5 picked from {{ counts.proposals }} ideas.</p>
+    <a class="btn primary" href="/dinners">Choose dinners</a>
+  {% elif week.status == "listing" %}
+    <h2>Claude is building the list</h2>
+    <p class="muted">Your picks are in. The list shows up here once Claude has drafted it.</p>
+  {% elif week.status == "review" %}
+    <h2>Review the list</h2>
+    <p>{{ counts["items"] }} items{% if counts.undecided %}, <b>{{ counts.undecided }} need an answer</b>{% endif %}.</p>
+    <a class="btn primary" href="/list">Review list</a>
+  {% elif week.status == "shopping" %}
+    <h2>Ready to shop</h2>
+    <p>Check things off in Mealie at the store.</p>
+    <a class="btn primary" href="{{ list_url() }}">Open Grocery list in Mealie ↗</a>
+  {% else %}
+    <h2>All done</h2>
+    <p>How were the dinners?</p>
+    <a class="btn primary" href="/rate">Rate this week</a>
+  {% endif %}
+</section>
+
+{% if week.claude_note %}
+<section class="card note"><h3>From Claude</h3><p>{{ week.claude_note }}</p></section>
+{% endif %}
+
+{% if picked %}
+<section class="card">
+  <h3>This week's dinners</h3>
+  <ul class="mini">
+    {% for p in picked %}
+    <li><a href="{{ recipe_url(p.slug) }}">{{ p.name }}</a>
+      <span class="muted">{% if p.kcal %}{{ p.kcal|round|int }} cal{% endif %}{% if p.protein %} · {{ p.protein|round|int }} g protein{% endif %}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="card">
+  <h3>On the Grocery list now</h3>
+  {% if not mealie_on %}
+    <p class="muted">Mealie isn't connected to Pantry yet.</p>
+  {% elif voice is none %}
+    <p class="muted">Couldn't reach Mealie.</p>
+  {% elif voice %}
+    <ul class="mini">{% for v in voice %}<li>🎙️ {{ v.text }}</li>{% endfor %}</ul>
+  {% else %}
+    <p class="muted">Nothing added by voice or by hand.</p>
+  {% endif %}
+  <a class="link" href="{{ list_url() }}">Open in Mealie ↗</a>
+</section>
+
+<section class="card">
+  <h3>Receipts</h3>
+  <p class="muted">{% if receipts_waiting %}{{ receipts_waiting }} photo{{ 's' if receipts_waiting != 1 }} waiting for Claude.{% else %}Back from the store? Send the receipt photos (at home only).{% endif %}</p>
+  <a class="btn" href="/receipts">📷 Send receipt photos</a>
+</section>
+
+<section class="card">
+  <h3>Note for Claude</h3>
+  <textarea id="weeknote" rows="3" placeholder="Busy Tuesday, away Thursday, craving tacos…">{{ week.note }}</textarea>
+  <button class="btn" data-save-note>Save note</button>
+</section>
+{% endif %}
+{% endblock %}

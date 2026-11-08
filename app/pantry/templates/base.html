@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}Pantry{% endblock %}</title>
+<meta name="theme-color" content="#2f6b4f">
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="/static/app.css?v={{ version }}">
+</head>
+<body>
+<header class="top">
+  <a href="/" class="brand"><img src="/static/icon.svg" alt=""><span>Pantry</span></a>
+  {% if week %}<span class="wk">Shop {{ week.id[5:7]|int }}/{{ week.id[8:10]|int }}</span>{% endif %}
+  {% if who %}<a class="me" href="/who" title="Not you?">{{ who }}</a>{% endif %}
+</header>
+<main>
+{% block body %}{% endblock %}
+</main>
+<nav class="tabs">
+  {% set p = request.url.path %}
+  <a href="/" class="{{ 'on' if p == '/' }}"><span class="ic">🏠</span>Week</a>
+  <a href="/dinners" class="{{ 'on' if p == '/dinners' }}"><span class="ic">🍽️</span>Dinners</a>
+  <a href="/list" class="{{ 'on' if p == '/list' }}"><span class="ic">🛒</span>List</a>
+  <a href="/rate" class="{{ 'on' if p == '/rate' }}"><span class="ic">⭐</span>Rate</a>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="/static/app.js?v={{ version }}"></script>
+</body>
+</html>

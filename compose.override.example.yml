@@ -1,0 +1,28 @@
+# Copy to compose.override.yml (gitignored) and fill in. Docker Compose merges it automatically.
+services:
+  pantry:
+    volumes:
+      # Optional: where receipt photos go (home network only). Omit to turn uploads off.
+      - /path/to/grocery/receipts/inbox:/inbox
+    env_file:
+      # MEALIE_TOKEN=<token of Pantry's own non-admin Mealie user>. Keep it outside the repo.
+      - path: /path/outside/the/repo/pantry-secrets
+        required: false
+    environment:
+      # Names shown in the "who are you?" picker on the LAN.
+      - PANTRY_NAMES=Alex,Sam
+      # Only if you put Pantry behind Cloudflare Access: email=Name pairs, team domain, AUD tag.
+      # - PANTRY_USERS=alex@example.com=Alex,sam@example.com=Sam
+      # - CF_ACCESS_TEAM_DOMAIN=yourteam.cloudflareaccess.com
+      # - CF_ACCESS_AUD=
+      # Home network. Requests are trusted only from PANTRY_LAN, never from PANTRY_HOST_IP (the
+      # Docker host, where a tunnel connector would connect from). Through the reverse proxy at
+      # PANTRY_CADDY_IP, the forwarded client must be a private address too.
+      - PANTRY_LAN=192.168.1.0/24
+      - PANTRY_CADDY_IP=192.168.1.1
+      - PANTRY_HOST_IP=192.168.1.10
+      # Mealie: LAN URL for the API, public URL for links, group slug, Grocery list id.
+      - MEALIE_URL=http://192.168.1.10:9925
+      - MEALIE_PUBLIC_URL=https://mealie.example.com
+      - MEALIE_GROUP_SLUG=home
+      - MEALIE_GROCERY_LIST_ID=00000000-0000-0000-0000-000000000000

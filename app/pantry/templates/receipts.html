@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Receipts · Pantry{% endblock %}
+{% block body %}
+<section class="card">
+  <h2>Receipt photos</h2>
+  {% if error %}<p class="err">{{ error }}</p>{% endif %}
+  {% if not home %}
+    <p class="muted">Receipt photos can only be sent from home, on the home Wi-Fi. They show card
+      details, so they never go through Cloudflare. Taildrop works from anywhere.</p>
+  {% elif not inbox_ok %}
+    <p class="muted">The receipt inbox isn't connected. Ask Claude to check Pantry.</p>
+  {% elif pending %}
+    <p>Add {{ pending|length }} photo{{ 's' if pending|length != 1 }} to the receipt inbox?</p>
+    <div class="thumbs">
+      {% for n in pending %}<img src="/receipts/pending/{{ token }}/{{ n }}" alt="Photo {{ loop.index }}" loading="lazy">{% endfor %}
+    </div>
+    <div class="row">
+      <button class="btn primary" data-receipt-confirm="{{ token }}">Add to inbox</button>
+      <button class="btn" data-receipt-discard="{{ token }}">Cancel</button>
+    </div>
+  {% else %}
+    <p class="muted">Take or pick the photos of one receipt (overlapping shots are fine), plus a
+      photo of a paper list if there was one. Claude reads them when you run <b>/receipt</b>.</p>
+    <form data-receipt-upload>
+      <label class="btn big primary file">📷 Choose photos
+        <input type="file" name="photos" accept="image/jpeg,image/png" multiple hidden>
+      </label>
+    </form>
+    <p class="muted small">Tip: in Google Photos, select the shots and Share → Pantry.</p>
+  {% endif %}
+  {% if home %}<p class="small" id="waiting">{{ receipts_waiting }} photo{{ 's' if receipts_waiting != 1 }} waiting for Claude.</p>{% endif %}
+</section>
+{% endblock %}

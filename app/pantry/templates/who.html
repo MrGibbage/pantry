@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="card center">
+  <h1>Who's this?</h1>
+  <p class="muted">At home there's no sign-in, so Pantry asks once and remembers on this device.</p>
+  <form method="post" action="/who" class="who">
+    <input type="hidden" name="next" value="{{ next }}">
+    {% for n in names %}
+    <button class="btn big {{ 'primary' if n == who }}" name="name" value="{{ n }}">{{ n }}</button>
+    {% endfor %}
+  </form>
+</section>
+{% endblock %}
