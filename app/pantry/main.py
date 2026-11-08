@@ -6,7 +6,9 @@ the Mealie Grocery list -> shop with Mealie -> /receipt clears what was bought -
 """
 import json
 import os
+import re
 import urllib.request
+from datetime import date, timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -33,6 +35,7 @@ SECTIONS = [
     ("extra", "Added by you"),
     ("onhand", "Probably on hand"),
 ]
+TRIGGER = Path(os.environ.get("PANTRY_TRIGGER_DIR", "/data/trigger"))
 PUBLIC_PATHS = ("/static/", "/healthz", "/manifest.webmanifest", "/sw.js", "/favicon.ico")
 
 
@@ -91,8 +94,20 @@ def ctx(request, c, **kw):
             "requests": c.execute("SELECT COUNT(*) FROM requests WHERE week_id=? "
                                   "AND status='open'", (w,)).fetchone()[0],
         }
+    job = c.execute("SELECT * FROM jobs ORDER BY id DESC LIMIT 1").fetchone()
+    base["job"] = dict(job) if job else None
+    base["next_shop_day"] = next_shop_day(c)
     base.update(kw)
     return base
+
+
+def next_shop_day(c):
+    """The first Sunday after both today and the newest week."""
+    start = date.today()
+    last = c.execute("SELECT MAX(id) FROM weeks").fetchone()[0]
+    if last:
+        start = max(start, date.fromisoformat(last) + timedelta(days=1))
+    return (start + timedelta(days=(6 - start.weekday()) % 7)).isoformat()
 
 
 def effective(item):
@@ -506,6 +521,40 @@ async def api_receipts_confirm(request: Request):
         w = db.current_week(c)
         db.log(c, "receipt_upload", w["id"] if w else "", request.state.who, names)
     return {"saved": len(names), "waiting": receipts.waiting()}
+
+
+@app.post("/api/jobs/plan-week")
+async def api_plan_week(request: Request):
+    """Ask Claude to plan a week. A timer on the Docker host picks the job up and runs Claude
+    Code there; Pantry itself never runs anything."""
+    b = await body(request)
+    wk = (b.get("week") or "").strip()
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", wk):
+        raise HTTPException(400, "Pick a shopping day.")
+    try:
+        d = date.fromisoformat(wk)
+    except ValueError:
+        raise HTTPException(400, "That's not a real date.")
+    if not date.today() <= d <= date.today() + timedelta(days=21):
+        raise HTTPException(400, "Pick a day in the next three weeks.")
+    who = request.state.who
+    with db.conn() as c:
+        if c.execute("SELECT 1 FROM jobs WHERE status IN ('queued','running')").fetchone():
+            raise HTTPException(409, "Claude is already working on it.")
+        if c.execute("SELECT 1 FROM proposals WHERE week_id=?", (wk,)).fetchone():
+            raise HTTPException(409, "That week already has ideas.")
+        note = (b.get("note") or "").strip()[:2000]
+        cur = c.execute("INSERT INTO jobs (kind, week_id, requested_by, requested_at, note) "
+                        "VALUES ('plan_week', ?, ?, ?, ?)", (wk, who, db.now(), note))
+        db.log(c, "job_request", wk, who, {"kind": "plan_week", "note": note})
+    # Wake the runner on the host: a systemd path unit watches this directory. Pantry can only
+    # create the file; what runs is fixed on the host side.
+    try:
+        TRIGGER.mkdir(exist_ok=True)
+        (TRIGGER / f"job-{cur.lastrowid}").touch()
+    except OSError:
+        pass   # the runner also sweeps the queue on start, so a missed wake-up isn't fatal
+    return {"id": cur.lastrowid}
 
 
 @app.post("/api/ratings")

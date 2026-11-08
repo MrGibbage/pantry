@@ -73,6 +73,15 @@
       } catch (_) { b.disabled = false; }
     }
 
+    else if (b.hasAttribute("data-plan-week")) {
+      const day = ($("#planday") || {}).value;
+      b.disabled = true;
+      try { await post("/api/jobs/plan-week", { week: day, note: ($("#plannote") || {}).value || "" });
+        toast("Asked Claude. Ideas usually show up within 10 minutes.");
+        setTimeout(() => location.reload(), 1200);
+      } catch (_) { b.disabled = false; }
+    }
+
     else if (b.hasAttribute("data-send")) {
       b.disabled = true;
       try {
@@ -147,4 +156,6 @@
     } catch (_) { toast("Couldn't reach Pantry. Are you on the home Wi-Fi?"); }
     finally { inp.value = ""; label.classList.remove("busy"); }
   });
+  // While Claude is planning, refresh the home page every 30 s until the job finishes.
+  if (document.querySelector("[data-job-active]")) setTimeout(() => location.reload(), 30000);
 })();

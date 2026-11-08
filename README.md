@@ -27,6 +27,16 @@ FastAPI + SQLite + Jinja templates + a little vanilla JS. No build step, no logi
 
 `docker exec pantry pantry help` lists every command and the JSON shapes.
 
+## "Plan next week" button
+
+The household can start a week from the home page. Pantry never runs the assistant itself: it
+records a job (`jobs` table) and creates a file in `/data/trigger/`. Something on the host
+watches that directory (here, a systemd path unit), claims the job with `pantry jobs claim`, runs
+the assistant with a short tool allowlist, and reports back with `pantry jobs finish ID
+done|failed`. The page shows "Claude is planning…" and refreshes until the ideas arrive. The
+assistant posts ideas one per command with `pantry propose WEEK SLUG --reason ...`, which fills
+the name, id, tags and nutrition from Mealie.
+
 ## Setup
 
 1. Copy `compose.override.example.yml` to `compose.override.yml` (gitignored) and fill it in:

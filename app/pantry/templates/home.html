@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block body %}
 {% if not week %}
-<section class="card center">
-  <h1>Nothing planned yet</h1>
-  <p class="muted">Claude posts this week's dinner ideas here. Ask Claude to start the week.</p>
-</section>
+{% include "_plan.html" %}
 {% else %}
+{% if week.status == "done" %}{% include "_plan.html" %}{% endif %}
 {% set steps = [("picking","Pick dinners"),("review","Review list"),("shopping","Shop"),("done","Done")] %}
 {% set order = {"picking":0,"listing":0,"review":1,"shopping":2,"done":3} %}
 <ol class="steps">

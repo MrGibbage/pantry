@@ -1,0 +1,22 @@
+{# "Plan next week": queues a job that Claude picks up on the server. #}
+{% if job and job.status in ("queued", "running") %}
+<section class="card note" data-job-active>
+  <h2>Claude is planning {{ job.week_id[5:7]|int }}/{{ job.week_id[8:10]|int }}…</h2>
+  <p>{% if job.status == "queued" %}It starts within a couple of minutes.{% else %}Working on it now. Ideas usually show up within 10 minutes.{% endif %}
+    This page refreshes by itself.</p>
+</section>
+{% else %}
+<section class="card">
+  <h2>Plan next week</h2>
+  {% if job and job.status == "failed" and (not week or job.week_id > week.id) %}
+    <p class="err">Claude couldn't finish planning {{ job.week_id }}{% if job.message %}: {{ job.message }}{% endif %}.
+      Try again, or ask Claude in chat.</p>
+  {% endif %}
+  <p class="muted">Claude picks about 10 dinner ideas and answers your requests. </p>
+  <label class="small muted" for="plannote">Anything Claude should know?</label>
+  <textarea id="plannote" rows="3" placeholder="Busy Tuesday, away Thursday, craving tacos…"></textarea>
+  <label class="small muted" for="planday">Shopping day</label>
+  <input id="planday" type="date" value="{{ next_shop_day }}">
+  <button class="btn primary big" data-plan-week>Ask Claude to plan it</button>
+</section>
+{% endif %}

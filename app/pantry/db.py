@@ -73,6 +73,18 @@ CREATE TABLE IF NOT EXISTS ratings (
   at TEXT NOT NULL,
   PRIMARY KEY (week_id, slug)
 );
+CREATE TABLE IF NOT EXISTS jobs (
+  id INTEGER PRIMARY KEY,
+  kind TEXT NOT NULL,                      -- plan_week
+  week_id TEXT NOT NULL DEFAULT '',
+  requested_by TEXT NOT NULL DEFAULT '',
+  requested_at TEXT NOT NULL,
+  note TEXT NOT NULL DEFAULT '',          -- household's note for Claude
+  status TEXT NOT NULL DEFAULT 'queued',   -- queued | running | done | failed
+  started_at TEXT NOT NULL DEFAULT '',
+  finished_at TEXT NOT NULL DEFAULT '',
+  message TEXT NOT NULL DEFAULT ''
+);
 CREATE TABLE IF NOT EXISTS events (
   id INTEGER PRIMARY KEY,
   at TEXT NOT NULL,
