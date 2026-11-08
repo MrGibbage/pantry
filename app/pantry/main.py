@@ -287,8 +287,20 @@ def image(recipe_id: str):
         with urllib.request.urlopen(mealie.image_url(recipe_id), timeout=8) as r:
             body, ctype = r.read(), r.headers.get("Content-Type", "image/webp")
     except Exception:
-        return Response(status_code=404)
+        # No photo in Mealie (or Mealie unreachable): a plate drawing instead of a broken image.
+        # Cached for a day only, so a photo added in Mealie later shows up.
+        return Response(NO_PHOTO, media_type="image/svg+xml",
+                        headers={"Cache-Control": "public, max-age=86400"})
     return Response(body, media_type=ctype, headers={"Cache-Control": "public, max-age=604800"})
+
+
+NO_PHOTO = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" preserveAspectRatio="xMidYMid slice">
+<rect width="120" height="120" fill="#2f6b4f" fill-opacity=".16"/>
+<g fill="none" stroke="#5aa883" stroke-width="3" stroke-linecap="round" stroke-opacity=".75">
+<circle cx="60" cy="60" r="24"/><circle cx="60" cy="60" r="15" stroke-opacity=".4"/>
+<path d="M27 40v12a5 5 0 0 0 10 0V40M32 40v40"/>
+<path d="M90 40c-6 3-7 12-6 20h6v20"/>
+</g></svg>"""
 
 
 @app.get("/favicon.ico")
