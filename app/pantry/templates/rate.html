@@ -12,12 +12,13 @@
     <li data-rate data-week="{{ b.week.id }}" data-slug="{{ d.slug }}">
       <div class="top">
         <a href="{{ recipe_url(d.slug) }}">{{ d.name }}</a>
+        <span class="again"><span class="muted small">Cook again?</span>
         <span class="seg">
-          <button data-r="1" aria-pressed="{{ 'true' if d.rating == 1 else 'false' }}" aria-label="Liked it">👍</button>
-          <button data-r="-1" aria-pressed="{{ 'true' if d.rating == -1 else 'false' }}" aria-label="Didn't like it">👎</button>
-        </span>
+          <button data-r="1" aria-pressed="{{ 'true' if d.rating == 1 else 'false' }}">Yes</button>
+          <button data-r="-1" aria-pressed="{{ 'true' if d.rating == -1 else 'false' }}">No</button>
+        </span></span>
       </div>
-      <input class="rnote" placeholder="Note (too spicy, make again, skip the rice…)" value="{{ d.note or '' }}">
+      <input class="rnote" placeholder="Note (optional: too spicy, give it one more try…)" value="{{ d.note or '' }}">
     </li>
   {% endfor %}
   </ul>

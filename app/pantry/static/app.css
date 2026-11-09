@@ -132,8 +132,10 @@ textarea:focus, input:focus { outline: 2px solid var(--brand); outline-offset: 1
 .rates { list-style: none; padding: 0; margin: 0; }
 .rates li { padding: 10px 0; border-top: 1px solid var(--line); }
 .rates .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
-.rates .seg button { font-size: 1.2rem; min-width: 52px; }
-.rates .seg button[aria-pressed="true"] { background: var(--brand-soft); }
+.rates .again { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.rates .seg button { min-width: 52px; }
+.rates .seg button[data-r="1"][aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); }
+.rates .seg button[data-r="-1"][aria-pressed="true"] { background: var(--warn); color: #fff; }
 .rnote { margin: 0; font-size: .9rem; }
 
 /* tabs */

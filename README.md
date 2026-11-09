@@ -22,7 +22,7 @@ FastAPI + SQLite + Jinja templates + a little vanilla JS. No build step, no logi
    **Send to Mealie**. Needed items go onto the Mealie Grocery list with
    `extras.source = "claude"`, skipping anything already there. Week moves to *shopping*.
 5. Shop with Mealie, checking items off.
-6. **Household** rates the dinners (👍/👎 + note). The assistant copies decisions and ratings
+6. **Household** answers "Cook again?" yes/no for each dinner (+ optional note). The assistant copies decisions and ratings
    into its long-term records with `pantry dump WEEK`.
 
 `docker exec pantry pantry help` lists every command and the JSON shapes.
