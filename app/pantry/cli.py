@@ -218,7 +218,7 @@ def main(argv=None):
                                       (n,)))
             for w in weeks:
                 w["picked"] = db.rows(c.execute(
-                    "SELECT p.slug, p.name, p.picked_by, r.rating, r.note AS rating_note "
+                    "SELECT p.slug, p.name, p.picked_by, p.cooked_at != '' AS cooked, r.rating, r.note AS rating_note "
                     "FROM proposals p LEFT JOIN ratings r ON r.week_id=p.week_id AND r.slug=p.slug "
                     "WHERE p.week_id=? AND p.picked=1 ORDER BY p.position", (w["id"],)))
                 w["not_picked"] = [r["slug"] for r in c.execute(

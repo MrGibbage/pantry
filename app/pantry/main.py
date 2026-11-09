@@ -153,6 +153,12 @@ def home(request: Request):
             except mealie.MealieError:
                 voice = None
         x["voice"] = voice
+        cw = db.cooking_week(c, date.today())
+        x["cooking"] = None
+        if cw:
+            x["cooking"] = {"week": dict(cw), "dishes": db.rows(c.execute(
+                "SELECT * FROM proposals WHERE week_id=? AND picked=1 ORDER BY position, id",
+                (cw["id"],)))}
         return templates.TemplateResponse("home.html", x)
 
 
@@ -360,6 +366,21 @@ async def api_pick(pid: int, request: Request):
         n = c.execute("SELECT COUNT(*) FROM proposals WHERE week_id=? AND picked=1",
                       (p["week_id"],)).fetchone()[0]
     return {"picked": picked, "by": who if picked else "", "count": n}
+
+
+@app.post("/api/proposals/{pid}/cooked")
+async def api_cooked(pid: int, request: Request):
+    b = await body(request)
+    with db.conn() as c:
+        p = c.execute("SELECT * FROM proposals WHERE id=? AND picked=1", (pid,)).fetchone()
+        if not p:
+            raise HTTPException(404)
+        at = db.now() if b.get("cooked") else ""
+        c.execute("UPDATE proposals SET cooked_at=? WHERE id=?", (at, pid))
+        db.log(c, "cooked" if at else "uncooked", p["week_id"], request.state.who, p["slug"])
+        n = c.execute("SELECT COUNT(*) FROM proposals WHERE week_id=? AND picked=1 "
+                      "AND cooked_at != ''", (p["week_id"],)).fetchone()[0]
+    return {"cooked": bool(at), "count": n}
 
 
 @app.post("/api/requests")

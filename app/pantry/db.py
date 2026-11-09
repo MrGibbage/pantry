@@ -5,7 +5,7 @@ import json
 import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 DB_PATH = os.environ.get("PANTRY_DB", "/data/pantry.db")
 
@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS proposals (
   picked INTEGER NOT NULL DEFAULT 0,
   picked_by TEXT NOT NULL DEFAULT '',
   picked_at TEXT NOT NULL DEFAULT '',
+  cooked_at TEXT NOT NULL DEFAULT '',      -- ticked "made it" on the home page
   UNIQUE (week_id, slug)
 );
 CREATE TABLE IF NOT EXISTS requests (
@@ -118,6 +119,9 @@ def conn():
 def init():
     with conn() as c:
         c.executescript(SCHEMA)
+        cols = {r[1] for r in c.execute("PRAGMA table_info(proposals)")}
+        if "cooked_at" not in cols:
+            c.execute("ALTER TABLE proposals ADD COLUMN cooked_at TEXT NOT NULL DEFAULT ''")
 
 
 def log(c, action, week_id="", who="", detail=""):
@@ -131,6 +135,15 @@ def current_week(c):
     """The newest week that isn't done, else the newest week, else None."""
     r = c.execute("SELECT * FROM weeks WHERE status != 'done' ORDER BY id DESC LIMIT 1").fetchone()
     return r or c.execute("SELECT * FROM weeks ORDER BY id DESC LIMIT 1").fetchone()
+
+
+def cooking_week(c, today):
+    """The week being cooked now: the newest shopped week (shopping or done) whose shop day
+    is today or earlier, if it was within the last two weeks."""
+    return c.execute(
+        "SELECT * FROM weeks WHERE status IN ('shopping','done') AND id <= ? AND id >= ? "
+        "ORDER BY id DESC LIMIT 1",
+        (today.isoformat(), (today - timedelta(days=13)).isoformat())).fetchone()
 
 
 def rows(cur):

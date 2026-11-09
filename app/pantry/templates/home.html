@@ -1,5 +1,22 @@
 {% extends "base.html" %}
 {% block body %}
+{% if cooking and cooking.dishes %}
+{% set made = cooking.dishes|selectattr("cooked_at")|list|length %}
+<section class="card cook">
+  <h3>Cooking this week</h3>
+  <p class="muted small">Shopped {{ cooking.week.id[5:7]|int }}/{{ cooking.week.id[8:10]|int }} · <span id="madecount">{{ made }}</span> of {{ cooking.dishes|length }} made</p>
+  <ul>
+    {% for d in cooking.dishes %}
+    <li class="{{ 'made' if d.cooked_at }}">
+      <img loading="lazy" src="/img/{{ d.recipe_id }}" alt="">
+      <div><a class="nm" href="{{ recipe_url(d.slug) }}">{{ d.name }}</a>
+        <span class="muted small">{% if d.kcal %}{{ d.kcal|round|int }} cal{% endif %}{% if d.protein %} · {{ d.protein|round|int }} g protein{% endif %}</span></div>
+      <button class="chk" data-cooked="{{ d.id }}" aria-pressed="{{ 'true' if d.cooked_at else 'false' }}" aria-label="Made it">✓</button>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% if not week %}
 {% include "_plan.html" %}
 {% else %}
@@ -39,7 +56,7 @@
 <section class="card note"><h3>From Claude</h3><p>{{ week.claude_note }}</p></section>
 {% endif %}
 
-{% if picked %}
+{% if picked and not (cooking and cooking.week.id == week.id) %}
 <section class="card">
   <h3>This week's dinners</h3>
   <ul class="mini">

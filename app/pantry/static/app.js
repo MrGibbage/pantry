@@ -36,6 +36,16 @@
       } catch (_) { b.setAttribute("aria-pressed", !on); card.classList.toggle("picked", !on); }
     }
 
+    else if (b.dataset.cooked) {
+      const on = b.getAttribute("aria-pressed") !== "true";
+      const li = b.closest("li");
+      b.setAttribute("aria-pressed", on); li.classList.toggle("made", on);
+      try {
+        const r = await post(`/api/proposals/${b.dataset.cooked}/cooked`, { cooked: on });
+        const c = $("#madecount"); if (c) c.textContent = r.count;
+      } catch (_) { b.setAttribute("aria-pressed", !on); li.classList.toggle("made", !on); }
+    }
+
     else if (b.dataset.decide) {
       const li = b.closest("[data-item]");
       const pressed = b.getAttribute("aria-pressed") === "true" && !li.classList.contains("guess");

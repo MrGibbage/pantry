@@ -158,3 +158,15 @@ textarea:focus, input:focus { outline: 2px solid var(--brand); outline-offset: 1
 .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin: 10px 0 14px; }
 .thumbs img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
 label.btn.file { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* cooking this week */
+.small { font-size: .85rem; }
+.cook ul { list-style: none; padding: 0; margin: 6px 0 0; }
+.cook li { display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.cook img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; background: var(--brand-soft); display: block; }
+.cook li div { min-width: 0; display: flex; flex-direction: column; }
+.cook .nm { font-weight: 600; text-decoration: none; }
+.cook li.made .nm { color: var(--muted); text-decoration: line-through; }
+.cook li.made img { opacity: .5; }
+.chk { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line); background: transparent; color: transparent; font-size: 1.1rem; cursor: pointer; }
+.chk[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
