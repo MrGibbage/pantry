@@ -10,7 +10,7 @@
 {% for p in proposals %}
 <article class="dish {{ 'picked' if p.picked }}" data-id="{{ p.id }}">
   <a class="photo" href="{{ recipe_url(p.slug) }}">
-    {% if p.recipe_id %}<img loading="lazy" src="/img/{{ p.recipe_id }}" alt="">{% endif %}
+    <img loading="lazy" src="/img/{{ p.recipe_id or "none" }}" alt="">
   </a>
   <div class="info">
     <a class="name" href="{{ recipe_url(p.slug) }}">{{ p.name }}</a>
@@ -69,7 +69,7 @@
     <p class="muted small">Recipes tagged <b>Pantry</b> in Mealie. Add one to this week's ideas:</p>
     <ul class="ideas">
       {% for i in ideas %}
-      <li><img loading="lazy" src="/img/{{ i.recipe_id }}" alt="">
+      <li><img loading="lazy" src="/img/{{ i.recipe_id or "none" }}" alt="">
         <a href="{{ recipe_url(i.slug) }}">{{ i.name }}</a>
         <button class="btn small" data-idea data-slug="{{ i.slug }}" data-name="{{ i.name }}">Suggest</button></li>
       {% endfor %}

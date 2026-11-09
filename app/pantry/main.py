@@ -289,6 +289,9 @@ def receipts_preview(token: str, name: str, request: Request):
 def image(recipe_id: str):
     if not recipe_id.replace("-", "").isalnum():
         raise HTTPException(404)
+    if recipe_id == "none":   # a pick that isn't in Mealie (yet)
+        return Response(NO_PHOTO, media_type="image/svg+xml",
+                        headers={"Cache-Control": "public, max-age=86400"})
     try:
         with urllib.request.urlopen(mealie.image_url(recipe_id), timeout=8) as r:
             body, ctype = r.read(), r.headers.get("Content-Type", "image/webp")
