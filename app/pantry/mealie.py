@@ -66,6 +66,7 @@ def grocery_items(include_checked=False):
             "text": (it.get("display") or it.get("note") or "").strip(),
             "checked": it.get("checked", False),
             "source": (it.get("extras") or {}).get("source", ""),
+            "created": it.get("createdAt") or "",
         })
     return out
 

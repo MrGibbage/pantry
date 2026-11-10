@@ -172,3 +172,8 @@ label.btn.file { display: flex; align-items: center; justify-content: center; cu
 .cook li.made img { opacity: .5; }
 .chk { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line); background: transparent; color: transparent; font-size: 1.1rem; cursor: pointer; }
 .chk[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+
+/* Grocery-list items carried over from the last trip */
+.mini li.row { flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; }
+.tag.old { background: #f3e6c9; color: #7a5a14; font-size: .78rem; white-space: nowrap; flex: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag.old { background: #3a3220; color: #e0c27a; } }

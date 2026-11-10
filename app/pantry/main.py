@@ -8,7 +8,7 @@ import json
 import os
 import re
 import urllib.request
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -110,6 +110,27 @@ def next_shop_day(c):
     return (start + timedelta(days=(6 - start.weekday()) % 7)).isoformat()
 
 
+def mark_leftovers(c, items):
+    """Flag Grocery-list items that were already on the list at the last trip (the newest week
+    marked done whose shop day has passed): still unchecked, so they carried over. Dates are
+    compared in the container's local time (set TZ)."""
+    if not items:
+        return items
+    trip = c.execute("SELECT id FROM weeks WHERE status='done' AND id <= ? ORDER BY id DESC "
+                     "LIMIT 1", (date.today().isoformat(),)).fetchone()
+    for it in items:
+        it["leftover"] = False
+        if trip and it.get("created"):
+            try:
+                t = datetime.fromisoformat(it["created"].replace("Z", "+00:00"))
+                if t.tzinfo is None:
+                    t = t.replace(tzinfo=timezone.utc)
+                it["leftover"] = t.astimezone().date().isoformat() <= trip[0]
+            except ValueError:
+                pass
+    return items
+
+
 def effective(item):
     return item["decision"] or item["default_decision"]
 
@@ -149,7 +170,7 @@ def home(request: Request):
         voice = []
         if mealie.enabled():
             try:   # everything still unchecked, whoever added it
-                voice = mealie.grocery_items()
+                voice = mark_leftovers(c, mealie.grocery_items())
             except mealie.MealieError:
                 voice = None
         x["voice"] = voice
@@ -202,7 +223,8 @@ def shopping_list(request: Request):
         voice, voice_err = [], ""
         if mealie.enabled():
             try:
-                voice = [i for i in mealie.grocery_items() if i["source"] != "claude"]
+                voice = mark_leftovers(
+                    c, [i for i in mealie.grocery_items() if i["source"] != "claude"])
             except mealie.MealieError as e:
                 voice_err = str(e)
         x.update(groups=groups, voice=voice, voice_err=voice_err)

@@ -17,7 +17,7 @@
   <ul class="items">
     {% for v in voice %}
     <li class="item" data-voice="{{ v.id }}">
-      <div class="what"><span class="nm">{{ v.text }}</span><span class="muted small">voice or Mealie</span></div>
+      <div class="what"><span class="nm">{{ v.text }}</span><span class="muted small">voice or Mealie{% if v.leftover %} · <span class="tag old">from last week</span>{% endif %}</span></div>
       <button class="btn small" data-voice-have="{{ v.id }}">Have it</button>
     </li>
     {% endfor %}

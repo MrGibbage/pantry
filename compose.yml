@@ -24,6 +24,6 @@ services:
       - ./data:/data
     environment:
       - PANTRY_DB=/data/pantry.db
-      - PANTRY_VERSION=6
+      - PANTRY_VERSION=7
       - PANTRY_ALLOW_LAN=1
       - MEALIE_IDEA_TAG=pantry
