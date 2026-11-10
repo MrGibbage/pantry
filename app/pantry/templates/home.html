@@ -75,9 +75,10 @@
   {% elif voice is none %}
     <p class="muted">Couldn't reach Mealie.</p>
   {% elif voice %}
-    <ul class="mini">{% for v in voice %}<li>🎙️ {{ v.text }}</li>{% endfor %}</ul>
+    <ul class="mini">{% for v in voice %}<li>{{ "🛒" if v.source == "claude" else "🎙️" }} {{ v.text }}</li>{% endfor %}</ul>
+    <p class="muted small">🛒 from Pantry's list · 🎙️ added by voice or in Mealie</p>
   {% else %}
-    <p class="muted">Nothing added by voice or by hand.</p>
+    <p class="muted">The list is empty.</p>
   {% endif %}
   <a class="link" href="{{ list_url() }}">Open in Mealie ↗</a>
 </section>

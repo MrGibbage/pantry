@@ -148,8 +148,8 @@ def home(request: Request):
                 "SELECT * FROM requests WHERE week_id=? ORDER BY id DESC LIMIT 5", (w,)))
         voice = []
         if mealie.enabled():
-            try:
-                voice = [i for i in mealie.grocery_items() if i["source"] != "claude"]
+            try:   # everything still unchecked, whoever added it
+                voice = mealie.grocery_items()
             except mealie.MealieError:
                 voice = None
         x["voice"] = voice
